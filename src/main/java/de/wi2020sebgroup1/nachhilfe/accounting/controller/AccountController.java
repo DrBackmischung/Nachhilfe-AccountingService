@@ -36,7 +36,7 @@ public class AccountController {
 	@GetMapping("/{number}")
 	public ResponseEntity<Object> getSpecific(@PathVariable String number){
 		try {
-			return new ResponseEntity<Object>(repo.findByNumber(number).get(), HttpStatus.OK);
+			return new ResponseEntity<Object>(repo.findById(number).get(), HttpStatus.OK);
 		}
 		catch(NoSuchElementException e) {
 			return new ResponseEntity<Object>("Account "+number+" nicht gefunden.", HttpStatus.NOT_FOUND);
@@ -45,7 +45,7 @@ public class AccountController {
 	
     @PostMapping(value = "/")
     public ResponseEntity<Account> save(@RequestBody Account a) {
-    	Account account = new Account(a.getNumber());
+    	Account account = new Account(a.getId());
     	return new ResponseEntity<>(repo.save(account), HttpStatus.CREATED);
     }
 	
@@ -55,13 +55,13 @@ public class AccountController {
     	Account credit, debit;
     	
     	try {
-			credit = repo.findByNumber(creditNumber).get();
+			credit = repo.findById(creditNumber).get();
 		}
     	catch(NoSuchElementException e) {
 			return new ResponseEntity<Object>("Account "+creditNumber+" nicht gefunden.", HttpStatus.NOT_FOUND);
 		}
     	try {
-    		debit = repo.findByNumber(debitNumber).get();
+    		debit = repo.findById(debitNumber).get();
 		}
     	catch(NoSuchElementException e) {
 			return new ResponseEntity<Object>("Account "+debitNumber+" nicht gefunden.", HttpStatus.NOT_FOUND);
