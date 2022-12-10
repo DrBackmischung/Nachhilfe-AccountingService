@@ -45,6 +45,14 @@ public class Account implements Serializable {
 		this.passive.add('5');
 		this.passive.add('8');
 	}
+	
+	public void credit(double c) {
+		this.credit.add(c);
+	}
+	
+	public void debit(double d) {
+		this.debit.add(d);
+	}
 
 	public String getId() {
 		return id;
