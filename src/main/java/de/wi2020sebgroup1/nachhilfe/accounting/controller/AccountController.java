@@ -1,7 +1,8 @@
 package de.wi2020sebgroup1.nachhilfe.accounting.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,13 +33,13 @@ public class AccountController {
 		return new ResponseEntity<>(repo.findAll(),HttpStatus.OK);
 	}
 	
-	@GetMapping("/{id}")
-	public ResponseEntity<Object> getSpecific(@PathVariable String id){
+	@GetMapping("/{number}")
+	public ResponseEntity<Object> getSpecific(@PathVariable String number){
 		try {
-			return new ResponseEntity<Object>(repo.findById(id).get(), HttpStatus.OK);
+			return new ResponseEntity<Object>(repo.findByNumber(number).get(), HttpStatus.OK);
 		}
 		catch(NoSuchElementException e) {
-			return new ResponseEntity<Object>("Account "+id+" nicht gefunden.", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<Object>("Account "+number+" nicht gefunden.", HttpStatus.NOT_FOUND);
 		}
 	}
 	
@@ -45,6 +47,33 @@ public class AccountController {
     public ResponseEntity<Account> save(@RequestBody Account a) {
     	Account account = new Account(a.getNumber());
     	return new ResponseEntity<>(repo.save(account), HttpStatus.CREATED);
+    }
+	
+    @PutMapping(value = "/{creditNumber}/{debitNumber}/{amount}")
+    public ResponseEntity<Object> transfer(@PathVariable String creditNumber, @PathVariable String debitNumber, @PathVariable double amount) {
+    	
+    	Account credit, debit;
+    	
+    	try {
+			credit = repo.findByNumber(creditNumber).get();
+		}
+    	catch(NoSuchElementException e) {
+			return new ResponseEntity<Object>("Account "+creditNumber+" nicht gefunden.", HttpStatus.NOT_FOUND);
+		}
+    	try {
+    		debit = repo.findByNumber(debitNumber).get();
+		}
+    	catch(NoSuchElementException e) {
+			return new ResponseEntity<Object>("Account "+debitNumber+" nicht gefunden.", HttpStatus.NOT_FOUND);
+		}
+    	
+    	credit.credit(amount);
+    	debit.debit(amount);
+    	List<Account> accounts = new ArrayList<>();
+    	accounts.add(credit);
+    	accounts.add(debit);
+    	
+    	return new ResponseEntity<Object>(repo.saveAll(accounts), HttpStatus.OK);
     }
 	
     @DeleteMapping(value = "/reset")
